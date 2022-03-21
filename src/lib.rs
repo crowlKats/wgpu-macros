@@ -156,7 +156,7 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
 
   let tokens = quote! {
     impl #name {
-      pub const LAYOUT: wgpu::VertexBufferLayout = wgpu::VertexBufferLayout {
+      pub const LAYOUT: wgpu::VertexBufferLayout<'static> = wgpu::VertexBufferLayout {
         array_stride: std::mem::size_of::<#name>() as wgpu::BufferAddress,
         step_mode: wgpu::VertexStepMode::#step_mode,
         attributes: &wgpu::vertex_attr_array![#(#vertices),*],
