@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+
+jobs:
+  build:
+    name: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: clone repo
+      uses: actions/checkout@v2
+
+    - name: install rust
+      uses: hecrj/setup-rust-action@v1
+      with:
+        rust-version: stable
+        components: clippy,rustfmt
+
+    - name: lint
+      run: cargo clippy -- -D clippy::all
+
+    - name: check fmt
+      run: cargo fmt -- --check
+
+    - name: test
+      run: cargo test --locked --all-targets --all-features -- --show-output
