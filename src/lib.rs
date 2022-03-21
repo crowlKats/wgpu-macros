@@ -22,20 +22,17 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
     .attrs
     .into_iter()
     .find_map(|attr| {
-      if attr.path.get_ident().unwrap().to_string() == "layout" {
+      if *attr.path.get_ident().unwrap() == "layout" {
         match attr.parse_meta().unwrap() {
           Meta::List(list) => match list.nested.into_iter().next().unwrap() {
-            NestedMeta::Meta(meta) => match meta {
-              Meta::Path(path) => {
-                let ident = path.get_ident().unwrap();
-                if matches!(ident.to_string().as_ref(), "Vertex" | "Instance") {
-                  Some(ident.clone())
-                } else {
-                  panic!("Invalid value")
-                }
+            NestedMeta::Meta(Meta::Path(path)) => {
+              let ident = path.get_ident().unwrap();
+              if matches!(ident.to_string().as_ref(), "Vertex" | "Instance") {
+                Some(ident.clone())
+              } else {
+                panic!("Invalid value")
               }
-              _ => panic!("Invalid value"),
-            },
+            }
             _ => panic!("Invalid value"),
           },
           _ => panic!("Invalid value"),
@@ -44,7 +41,7 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
         None
       }
     })
-    .unwrap_or(format_ident!("Vertex"));
+    .unwrap_or_else(|| format_ident!("Vertex"));
 
   let name = input.ident;
 
@@ -59,25 +56,22 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
   };
 
   let vertices = fields.into_iter().enumerate().map(|(n, field)| {
-    let span = field.span().clone();
+    let span = field.span();
     let attr = field
       .attrs
       .into_iter()
       .find_map(|attr| {
-        if attr.path.get_ident().unwrap().to_string() == "layout" {
+        if *attr.path.get_ident().unwrap() == "layout" {
           match attr.parse_meta().unwrap() {
             Meta::List(list) => match list.nested.into_iter().next().unwrap() {
-              NestedMeta::Meta(meta) => match meta {
-                Meta::Path(path) => {
-                  let ident = path.get_ident().unwrap();
-                  if ident.to_string() == "norm" {
-                    Some(Attr::Norm(true))
-                  } else {
-                    Some(Attr::Override(ident.clone()))
-                  }
+              NestedMeta::Meta(Meta::Path(path)) => {
+                let ident = path.get_ident().unwrap();
+                if *ident == "norm" {
+                  Some(Attr::Norm(true))
+                } else {
+                  Some(Attr::Override(ident.clone()))
                 }
-                _ => panic!("Invalid value"),
-              },
+              }
               _ => panic!("Invalid value"),
             },
             _ => panic!("Invalid value"),
