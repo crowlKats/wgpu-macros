@@ -14,6 +14,71 @@ enum Attr {
   Norm(bool),
 }
 
+/// Allows for generation of a `wgpu::VertexBufferLayout`, which can be accessed
+/// by the `LAYOUT` constant on the macro.
+///
+/// ```
+/// # use wgpu;
+/// # use wgpu_macros::VertexLayout;
+/// # #[repr(C)]
+/// #[derive(VertexLayout)]
+/// struct Vertex {
+///   position: [f32; 3],
+///   tex_coords: [f32; 2],
+/// }
+///
+/// fn main() {
+///   Vertex::LAYOUT; // use in a RenderPipelineDescriptor
+/// }
+/// ```
+///
+/// # Changing `step_mode`
+/// By default, the `step_mode` is set to `Vertex`.
+/// To change the `step_mode` for the `VertexBufferLayout`, you can declare the
+/// `layout` attribute macro for the struct, and passing one of the variants
+/// of `wgpu::VertexStepMode`.
+///
+/// ```
+/// # use wgpu_macros::VertexLayout;
+/// # #[repr(C)]
+/// #[derive(VertexLayout)]
+/// #[layout(Instance)]
+/// struct Vertex {}
+/// ```
+///
+/// # Using `norm` Variants
+///
+/// By specifying `norm` the `layout` attribute macro for the field you want,
+/// it will use the `norm` variant corresponding to the field value.
+///
+/// ```
+/// # use wgpu_macros::VertexLayout;
+/// # #[repr(C)]
+/// #[derive(VertexLayout)]
+/// struct Vertex {
+///   # position: [f32; 3],
+///   #[layout(norm)]
+///   tex_coords: [u8; 2],
+/// }
+/// ```
+///
+/// So `Uint8x2` becomes `Unorm8x2`.
+///
+/// # Overriding Generated `VertexFormat`
+///
+/// By specifying the wanted `VertexFormat` in the `layout` attribute macro for
+/// the field you want, you can override the generated `VertexFormat`.
+///
+/// ```
+/// # use wgpu_macros::VertexLayout;
+/// # #[repr(C)]
+/// #[derive(VertexLayout)]
+/// struct Vertex {
+///   # position: [f32; 3],
+///   #[layout(Uint16x4)]
+///   tex_coords: [f32; 2],
+/// }
+/// ```
 #[proc_macro_derive(VertexLayout, attributes(layout))]
 pub fn vertex_layout(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
