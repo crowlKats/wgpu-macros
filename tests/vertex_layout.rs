@@ -26,20 +26,18 @@ fn test() {
         },
         wgpu::VertexAttribute {
           format: wgpu::VertexFormat::Float64,
-          offset: 0 + wgpu::VertexFormat::Unorm8x2.size(),
+          offset: wgpu::VertexFormat::Unorm8x2.size(),
           shader_location: 1,
         },
         wgpu::VertexAttribute {
           format: wgpu::VertexFormat::Uint16x2,
-          offset: 0
-            + wgpu::VertexFormat::Unorm8x2.size()
+          offset: wgpu::VertexFormat::Unorm8x2.size()
             + wgpu::VertexFormat::Float64.size(),
           shader_location: 2,
         },
         wgpu::VertexAttribute {
           format: wgpu::VertexFormat::Float64,
-          offset: 0
-            + wgpu::VertexFormat::Unorm8x2.size()
+          offset: wgpu::VertexFormat::Unorm8x2.size()
             + wgpu::VertexFormat::Float64.size()
             + wgpu::VertexFormat::Uint16x2.size(),
           shader_location: 3,
