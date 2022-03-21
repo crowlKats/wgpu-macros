@@ -3,6 +3,9 @@ name = "wgpu_macros"
 version = "0.1.0"
 authors = ["crowlkats <crowlkats@toaxl.com>"]
 edition = "2021"
+license-file = "LICENSE"
+description = "A set of useful proc macros for wgpu"
+repository = "https://github.com/crowlKats/wgpu-macros"
 
 [lib]
 proc-macro = true
