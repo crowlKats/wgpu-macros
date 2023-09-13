@@ -46,6 +46,30 @@ enum Attr {
 /// struct Vertex {}
 /// ```
 ///
+/// # Specifying shader `location`
+///
+/// By default the shader `location` starts at `0` and increments by `1` for each field.
+///
+/// However you can manually specify the `location` for a field:
+///
+/// ```
+/// # use wgpu_macros::VertexLayout;
+/// # #[repr(C)]
+/// #[derive(VertexLayout)]
+/// struct Vertex {
+///   #[layout(location = 3)]
+///   position: [f32; 3],
+///
+///   tex_coords: [u8; 2],
+/// }
+/// ```
+///
+/// So the `position` will be at shader location `3`.
+///
+/// If a field doesn't have a `location` it will increment the previous field's location by `1`.
+///
+/// Because `tex_coords` doesn't have a `location` it will have a `location` of `4`.
+///
 /// # Using `norm` Variants
 ///
 /// By specifying `norm` the `layout` attribute macro for the field you want,
@@ -120,7 +144,9 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
     Fields::Unit => panic!("Unit structs arent allowed for VertexLayout"),
   };
 
-  let vertices = fields.into_iter().enumerate().map(|(n, field)| {
+  let mut location: u32 = 0;
+
+  let vertices = fields.into_iter().map(|field| {
     let span = field.span();
     let attr = field
       .attrs
@@ -135,6 +161,20 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
                   Some(Attr::Norm(true))
                 } else {
                   Some(Attr::Override(ident.clone()))
+                }
+              }
+              NestedMeta::Meta(Meta::NameValue(name_value)) => {
+                let ident = name_value.path.get_ident().unwrap();
+                if matches!(ident.to_string().as_ref(), "location") {
+                  match name_value.lit {
+                    Lit::Int(lit) => {
+                      location = lit.base10_parse().unwrap();
+                      None
+                    },
+                    _ => panic!("Invalid value"),
+                  }
+                } else {
+                  panic!("Invalid value")
                 }
               }
               _ => panic!("Invalid value"),
@@ -215,8 +255,11 @@ pub fn vertex_layout(input: TokenStream) -> TokenStream {
       }
     };
 
-    let n = n as u32;
-    quote!(#n => #ident)
+    let output = quote!(#location => #ident);
+
+    location += 1;
+
+    output
   });
 
   let tokens = quote! {
